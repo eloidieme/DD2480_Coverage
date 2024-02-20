@@ -134,6 +134,22 @@ class BaseItemExporterTest(unittest.TestCase):
             ie.serialize_field(a.get_field_meta("age"), "age", a["age"]), "24"
         )
 
+    def test_missing_field_yields_default_value(self):
+        serializer = BaseItemExporter() 
+        item = {"existing_field": "value"}  
+        serializer.fields_to_export = ["existing_field", "missing_field"]  
+        default_value = "default"  
+
+        # Ensure include_empty is True so that the function attempts to include the missing field
+        serialized_fields = list(serializer._get_serialized_fields(item, default_value=default_value, include_empty=True))
+
+        expected_fields = [
+            ("existing_field", "value"),  
+            ("missing_field", default_value),  
+        ]
+        assert serialized_fields == expected_fields, "Should include missing fields with default values"
+
+
 
 class BaseItemExporterDataclassTest(BaseItemExporterTest):
     item_class = TestDataClass
