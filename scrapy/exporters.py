@@ -61,40 +61,61 @@ class BaseItemExporter:
     def _get_serialized_fields(self, item, default_value=None, include_empty=None):
         """Return the fields to export as an iterable of tuples
         (name, serialized_value)
+    
+        Requirements:
+        - Handle `include_empty` to determine if fields not present in the item should be included.
+        - Process `fields_to_export` to control which fields are serialized.
+        - Support different types for `fields_to_export` (None, Mapping, Iterable).
+        - Serialize fields based on item content, field metadata, and provided configuration.
+        - Use `default_value` for fields specified in `fields_to_export` but missing in the item.
         """
+        # Adapt item to a consistent interface for field access.
         item = ItemAdapter(item)
 
+        # Determine if empty fields should be included based on `include_empty` parameter.
         if include_empty is None:
             include_empty = self.export_empty_fields
 
+        # If no specific fields to export are defined, use all fields from the item,
+        # considering whether to include empty fields based on `include_empty`.
         if self.fields_to_export is None:
             if include_empty:
-                field_iter = item.field_names()
+                field_iter = item.field_names() # All field names, including potentially empty ones.
             else:
-                field_iter = item.keys()
+                field_iter = item.keys() # Only fields that are present and have values.
+        
+        # If `fields_to_export` is a Mapping, it specifies explicit field mappings.
+        # Iterate according to `include_empty` to include or exclude fields not present in the item.
         elif isinstance(self.fields_to_export, Mapping):
             if include_empty:
-                field_iter = self.fields_to_export.items()
+                field_iter = self.fields_to_export.items() # All specified fields, regardless of presence in item.
             else:
                 field_iter = (
-                    (x, y) for x, y in self.fields_to_export.items() if x in item
+                    (x, y) for x, y in self.fields_to_export.items() if x in item # Only specified fields present in item.
                 )
+        
+        # Otherwise, `fields_to_export` is an iterable (list, set, etc.) of field names.
+        # Include fields based on their presence in the item and the `include_empty` flag.
         else:
             if include_empty:
-                field_iter = self.fields_to_export
+                field_iter = self.fields_to_export # All specified fields, potentially including empty ones.
             else:
-                field_iter = (x for x in self.fields_to_export if x in item)
+                field_iter = (x for x in self.fields_to_export if x in item) # Only specified fields present in item.
 
+        # Iterate over fields to serialize, handling both string names and (source, dest) mappings.
         for field_name in field_iter:
+            # Direct name or a tuple (source, dest) for renaming.
             if isinstance(field_name, str):
                 item_field, output_field = field_name, field_name
             else:
                 item_field, output_field = field_name
+
+            # Serialize field value if present, or use `default_value` if not.
             if item_field in item:
                 field_meta = item.get_field_meta(item_field)
                 value = self.serialize_field(field_meta, output_field, item[item_field])
             else:
-                value = default_value
+                value = default_value # Use default value for missing fields.
 
             yield output_field, value
 
