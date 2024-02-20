@@ -149,6 +149,24 @@ class BaseItemExporterTest(unittest.TestCase):
         ]
         assert serialized_fields == expected_fields, "Should include missing fields with default values"
 
+    def test_mapping_with_include_empty_true(self):
+        """
+        Test that all specified fields in `fields_to_export` as a mapping are included
+        when `include_empty` is True, specifically targeting line 77.
+        """
+        serializer = BaseItemExporter()  
+        serializer.export_empty_fields = True  
+        
+        serializer.fields_to_export = {"missing_field": "Missing Value"}
+        
+        item = {} 
+        
+        # Execute with a default value to check if the line is covered without implicitly covering more
+        serialized_fields = list(serializer._get_serialized_fields(item, default_value="N/A"))
+
+        expected = [("Missing Value", "N/A")]
+        assert serialized_fields == expected, "Field specified in mapping should be included with default value"
+
 
 
 class BaseItemExporterDataclassTest(BaseItemExporterTest):
