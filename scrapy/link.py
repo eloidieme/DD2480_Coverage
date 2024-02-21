@@ -30,17 +30,28 @@ class Link:
     def __init__(
         self, url: str, text: str = "", fragment: str = "", nofollow: bool = False
     ):
+        # Requirement 1:
+        # url must be a string
+        # Not tested
         if not isinstance(url, str):
             got = url.__class__.__name__
             raise TypeError(f"Link urls must be str objects, got {got}")
+        
         self.url: str = url
         self.text: str = text
         self.fragment: str = fragment
         self.nofollow: bool = nofollow
 
     def __eq__(self, other: Any) -> bool:
+        # Requirement 2:
+        # object we compare to must be a link
+        # Not tested
         if not isinstance(other, Link):
             raise NotImplementedError
+        
+        # Requirement 3:
+        # Attributes must be the same
+        # Tested
         return (
             self.url == other.url
             and self.text == other.text

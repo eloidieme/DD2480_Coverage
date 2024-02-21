@@ -55,3 +55,21 @@ class LinkTest(unittest.TestCase):
     def test_bytes_url(self):
         with self.assertRaises(TypeError):
             Link(b"http://www.example.com/\xc2\xa3")
+
+    # Test if the url 5 (an int) returns a Type Error
+    def test_if_string(self):
+        with self.assertRaises(TypeError):
+            Link(5)
+
+    # Test if a link compared to a non-link object raises a NotImplementedError
+    def test_equals_not_link(self):
+        l1 = Link(
+            "http://www.example.com", text="test", fragment="something", nofollow=True
+        )
+        l2 = 5
+        with self.assertRaises(NotImplementedError):
+            self.assertEqual(l1, l2)
+                
+
+
+
