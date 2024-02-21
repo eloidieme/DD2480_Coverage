@@ -23,6 +23,7 @@ from scrapy.utils.misc import arg_to_iter, rel_has_nofollow
 from scrapy.utils.python import unique as unique_list
 from scrapy.utils.response import get_base_url
 from scrapy.utils.url import url_has_any_extension, url_is_from_any_domain
+from scrapy.utils.logger import log_branch
 
 logger = logging.getLogger(__name__)
 
@@ -181,24 +182,32 @@ class LxmlLinkExtractor:
 
     def _link_allowed(self, link):
         if not _is_valid_url(link.url):
+            log_branch(1,'_link_allowed')
             return False
         if self.allow_res and not _matches(link.url, self.allow_res):
+            log_branch(2,'_link_allowed')
             return False
         if self.deny_res and _matches(link.url, self.deny_res):
+            log_branch(3,'_link_allowed')
             return False
         parsed_url = urlparse(link.url)
         if self.allow_domains and not url_is_from_any_domain(
             parsed_url, self.allow_domains
         ):
+            log_branch(4,'_link_allowed')
             return False
         if self.deny_domains and url_is_from_any_domain(parsed_url, self.deny_domains):
+            log_branch(5,'_link_allowed')
             return False
         if self.deny_extensions and url_has_any_extension(
             parsed_url, self.deny_extensions
         ):
+            log_branch(6,'_link_allowed')
             return False
         if self.restrict_text and not _matches(link.text, self.restrict_text):
+            log_branch(7,'_link_allowed')
             return False
+        log_branch(8,'_link_allowed')
         return True
 
     def matches(self, url):
