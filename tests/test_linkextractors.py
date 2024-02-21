@@ -745,6 +745,21 @@ class Base:
             lx = self.extractor_cls()
             self.assertIsInstance(pickle.loads(pickle.dumps(lx)), self.extractor_cls)
 
+        # Tests that no links are returned if a link of a non-valid form is given
+        def test_not_valid_link(self):
+            body = b"""
+            <html><body>
+            <div><a href="test.test">An Item</a></div>
+            </body></html>"""
+            
+            lx = self.extractor_cls()
+            response = HtmlResponse("test.test", body=body)
+
+
+            self.assertEqual(
+                lx.extract_links(response),
+                [],
+            )
 
 class LxmlLinkExtractorTestCase(Base.LinkExtractorTestCase):
     extractor_cls = LxmlLinkExtractor

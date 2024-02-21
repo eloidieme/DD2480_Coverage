@@ -180,23 +180,37 @@ class LxmlLinkExtractor:
         ]
 
     def _link_allowed(self, link):
+        # Req1: link is of a valid form 
+        # Not tested
         if not _is_valid_url(link.url):
             return False
+        # Req2: If the url does not match the allowed regular expression, it should be rejected
+        # Tested
         if self.allow_res and not _matches(link.url, self.allow_res):
             return False
+        # Req3: If the url matches the denied regular expression, it should be rejected
+        # Tested
         if self.deny_res and _matches(link.url, self.deny_res):
             return False
         parsed_url = urlparse(link.url)
+        # Req4: If the domain is not explicitly allowed, it should be rejected
+        # Tested
         if self.allow_domains and not url_is_from_any_domain(
             parsed_url, self.allow_domains
         ):
             return False
+        # Req5: If the given domain is explicitly denied, it should be denied
+        # Tested 
         if self.deny_domains and url_is_from_any_domain(parsed_url, self.deny_domains):
             return False
+        # Req6: Only let there be extensions if they are allowed
+        # Tested
         if self.deny_extensions and url_has_any_extension(
             parsed_url, self.deny_extensions
         ):
             return False
+        # Req7: If the text is restricted, the given test should match the restriction 
+        # Tested
         if self.restrict_text and not _matches(link.text, self.restrict_text):
             return False
         return True
