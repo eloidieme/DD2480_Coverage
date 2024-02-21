@@ -178,6 +178,8 @@ ITEM_PIPELINES = {{'{self.project_name}.pipelines.MyPipeline': 1}}
         command.requests = {2: [6, 7, 8], 7: [9]}
         self.assertEqual(command.max_level, 7, "max_level should be equal to the max of the deepest level")
 
+    def test_max_level_empty(self):
+        command = parse.Command()
         # Example items and requests where requests is empty
         command.items = {1: [10, 11, 12], 20: [1, 2, 3]} 
         command.requests = {} 
