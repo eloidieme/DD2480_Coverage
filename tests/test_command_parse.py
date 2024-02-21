@@ -170,6 +170,29 @@ ITEM_PIPELINES = {{'{self.project_name}.pipelines.MyPipeline': 1}}
 """
             )
 
+    def test_max_level(self):
+        command = parse.Command()
+
+        # Example items and requests
+        command.items = {1: [1, 2, 3], 5: [4, 5]}
+        command.requests = {2: [6, 7, 8], 7: [9]}
+        self.assertEqual(command.max_level, 7, "max_level should be equal to the max of the deepest level")
+
+        # Example items and requests where requests is empty
+        command.items = {1: [10, 11, 12], 20: [1, 2, 3]} 
+        command.requests = {} 
+        self.assertEqual(command.max_level, 20, "max_level should be equal to the max of items when requests is empty")
+
+        # Example items and requests where items is empty
+        command.items = {}
+        command.requests = {1: [1, 2, 3], 5: [4, 5]}
+        self.assertEqual(command.max_level, 5, "max_level should be equal to the max of requests when items is empty")
+
+        # Example items and requests where both are empty
+        command.items = {}
+        command.requests = {}
+        self.assertEqual(command.max_level, 0, "max_level should be equal to 0 when both items and requests are empty")
+
     @defer.inlineCallbacks
     def test_spider_arguments(self):
         _, _, stderr = yield self.execute(
