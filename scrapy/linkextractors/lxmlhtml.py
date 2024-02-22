@@ -184,30 +184,37 @@ class LxmlLinkExtractor:
         if not _is_valid_url(link.url):
             log_branch(1,'_link_allowed')
             return False
+        else: log_branch(2,'_link_allowed')
         if self.allow_res and not _matches(link.url, self.allow_res):
-            log_branch(2,'_link_allowed')
-            return False
-        if self.deny_res and _matches(link.url, self.deny_res):
             log_branch(3,'_link_allowed')
             return False
+        else: log_branch(4,'_link_allowed')
+        if self.deny_res and _matches(link.url, self.deny_res):
+            log_branch(5,'_link_allowed')
+            return False
+        else: log_branch(6,'_link_allowed')
         parsed_url = urlparse(link.url)
         if self.allow_domains and not url_is_from_any_domain(
             parsed_url, self.allow_domains
         ):
-            log_branch(4,'_link_allowed')
+            log_branch(7,'_link_allowed')
             return False
+        else: log_branch(8,'_link_allowed')
         if self.deny_domains and url_is_from_any_domain(parsed_url, self.deny_domains):
-            log_branch(5,'_link_allowed')
+            log_branch(9,'_link_allowed')
             return False
+        else: log_branch(10,'_link_allowed')
         if self.deny_extensions and url_has_any_extension(
             parsed_url, self.deny_extensions
         ):
-            log_branch(6,'_link_allowed')
+            log_branch(11,'_link_allowed')
             return False
+        else: log_branch(12,'_link_allowed')
         if self.restrict_text and not _matches(link.text, self.restrict_text):
-            log_branch(7,'_link_allowed')
+            log_branch(13,'_link_allowed')
             return False
-        log_branch(8,'_link_allowed')
+        else: log_branch(14,'_link_allowed')
+        log_branch(15,'_link_allowed')
         return True
 
     def matches(self, url):
