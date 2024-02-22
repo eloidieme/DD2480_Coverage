@@ -25,6 +25,7 @@ from scrapy.http.request import Request
 from scrapy.http.response.text import TextResponse
 from scrapy.utils.python import is_listlike, to_bytes
 from scrapy.utils.response import get_base_url
+from scrapy.utils.logger import log_branch
 
 if TYPE_CHECKING:
     # typing.Self requires Python 3.11
@@ -164,12 +165,16 @@ def _get_inputs(
     clickdata: Optional[dict],
 ) -> List[FormdataKVType]:
     """Return a list of key-value pairs for the inputs found in the given form."""
+    func_name="_get_inputs"
     try:
+        log_branch(1,func_name)
         formdata_keys = dict(formdata or ()).keys()
     except (ValueError, TypeError):
+        log_branch(2,func_name)
         raise ValueError("formdata should be a dict or iterable of tuples")
 
     if not formdata:
+        log_branch(3,func_name)
         formdata = []
     inputs = form.xpath(
         "descendant::textarea"
@@ -180,21 +185,47 @@ def _get_inputs(
         '  not(re:test(., "^(?:checkbox|radio)$", "i")))]]',
         namespaces={"re": "http://exslt.org/regular-expressions"},
     )
-    values: List[FormdataKVType] = [
-        (k, "" if v is None else v)
-        for k, v in (_value(e) for e in inputs)
-        if k and k not in formdata_keys
-    ]
+    
+    # values: List[FormdataKVType] = [
+    #     (k, "" if v is None else v)
+    #     for k, v in (_value(e) for e in inputs)
+    #     if k and k not in formdata_keys
+    # ]
+    
+    # rewrite for finding branch coverage
+    values=[]
+    for e in inputs:
+        log_branch(4,func_name)
+        k, v = _value(e)
+        if k and k not in formdata_keys:
+            log_branch(5,func_name)
+            if v is None:
+                log_branch(6,func_name)
+                values.append((k, ""))
+            else:
+                log_branch(7,func_name)
+                values.append((k, v))
 
     if not dont_click:
+        log_branch(8,func_name)
         clickable = _get_clickable(clickdata, form)
         if clickable and clickable[0] not in formdata and not clickable[0] is None:
+            log_branch(9,func_name)
             values.append(clickable)
-
+    
     if isinstance(formdata, dict):
+        log_branch(10,func_name)
         formdata = formdata.items()  # type: ignore[assignment]
 
-    values.extend((k, v) for k, v in formdata if v is not None)
+    #values.extend((k, v) for k, v in formdata if v is not None)
+    
+    # rewrite for finding branch coverage
+    for k,v in formdata:
+        log_branch(11,func_name)
+        if v is not None:
+            log_branch(12,func_name)
+            values.append((k,v))
+    
     return values
 
 
