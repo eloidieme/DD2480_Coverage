@@ -434,7 +434,15 @@ class FormRequestTest(RequestTest):
     def test_empty_formdata(self):
         r1 = self.request_class("http://www.example.com", formdata={})
         self.assertEqual(r1.body, b"")
-
+        
+    def test_formdata_is_list(self):
+        with self.assertRaises(TypeError):
+            self.request_class("http://www.example.com", formdata=[1])
+    
+    def test_formdata_is_tuple(self):
+        with self.assertRaises(TypeError):
+            self.request_class("http://www.example.com", formdata=(1,1))
+    
     def test_formdata_overrides_querystring(self):
         data = (("a", "one"), ("a", "two"), ("b", "2"))
         url = self.request_class(

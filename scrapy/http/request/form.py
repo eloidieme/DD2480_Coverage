@@ -104,12 +104,15 @@ def _get_form_url(form: FormElement, url: Optional[str]) -> str:
 
 
 def _urlencode(seq: Iterable[FormdataKVType], enc: str) -> str:
-    values = [
-        (to_bytes(k, enc), to_bytes(v, enc))
-        for k, vs in seq
-        for v in (cast(Iterable[str], vs) if is_listlike(vs) else [cast(str, vs)])
-    ]
-    return urlencode(values, doseq=True)
+    try:
+        values = [
+            (to_bytes(k, enc), to_bytes(v, enc))
+            for k, vs in seq
+            for v in (cast(Iterable[str], vs) if is_listlike(vs) else [cast(str, vs)])
+        ]
+        return urlencode(values, doseq=True)
+    except TypeError:
+        raise TypeError("formdata should be a dict or iterable of tuples")
 
 
 def _get_form(
@@ -164,10 +167,8 @@ def _get_inputs(
     clickdata: Optional[dict],
 ) -> List[FormdataKVType]:
     """Return a list of key-value pairs for the inputs found in the given form."""
-    try:
-        formdata_keys = dict(formdata or ()).keys()
-    except (ValueError, TypeError):
-        raise ValueError("formdata should be a dict or iterable of tuples")
+    
+    formdata_keys=dict(formdata or ()).keys()
 
     if not formdata:
         formdata = []
